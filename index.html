@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel IoT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="panel">
+
+  <!-- ===== Header / status bar ===== -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark"></span>
+      <div class="brand-text">
+        <h1>Panel IoT</h1>
+        <span class="room-label">Rumah Saya</span>
+      </div>
+    </div>
+
+    <button class="status-pill" id="statusPill" type="button" aria-label="Buka pengaturan koneksi">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Terputus</span>
+    </button>
+  </header>
+
+  <!-- ===== Perangkat (dinamis) ===== -->
+  <section class="devices-block">
+    <div class="devices-head">
+      <h2>Perangkat</h2>
+      <button class="btn-add" id="addDeviceBtn" type="button">+ Tambah Perangkat</button>
+    </div>
+    <div class="device-grid" id="deviceGrid">
+      <!-- kartu perangkat dirender oleh script.js -->
+    </div>
+  </section>
+
+  <!-- ===== Log strip ===== -->
+  <section class="log-strip">
+    <div class="log-strip-head">
+      <span>Aktivitas Pesan MQTT</span>
+      <button class="link-btn" id="clearLogBtn" type="button">Bersihkan</button>
+    </div>
+    <ul class="log-list" id="logList">
+      <li class="log-empty">Belum ada pesan. Hubungkan ke broker untuk mulai memantau.</li>
+    </ul>
+  </section>
+
+  <!-- ===== Panel: Tambah Perangkat (collapsible) ===== -->
+  <section class="settings" id="devicePanel">
+    <div class="settings-head">
+      <h2>Tambah Perangkat</h2>
+      <button class="link-btn" id="closeDevicePanelBtn" type="button">Tutup</button>
+    </div>
+
+    <div class="type-pills" id="typePills">
+      <button class="type-pill is-active" type="button" data-type="sensor">🌡️ Sensor</button>
+      <button class="type-pill" type="button" data-type="switch">💡 Saklar</button>
+    </div>
+
+    <div class="settings-grid">
+      <label class="field">
+        <span>Nama Perangkat</span>
+        <input type="text" id="devName" placeholder="Contoh: Suhu Ruang Tamu">
+      </label>
+      <label class="field">
+        <span>Ikon <em>(emoji, opsional)</em></span>
+        <input type="text" id="devIcon" placeholder="🌡️" maxlength="4">
+      </label>
+
+      <!-- field khusus tipe Sensor -->
+      <div class="field-group" id="sensorFields">
+        <label class="field">
+          <span>Topic (langganan data)</span>
+          <input type="text" id="devTopic" placeholder="rumah/ruang_tamu/suhu">
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Satuan</span>
+            <input type="text" id="devUnit" placeholder="°C" value="°C">
+          </label>
+          <label class="field">
+            <span>Nilai Min</span>
+            <input type="number" id="devMin" value="0">
+          </label>
+          <label class="field">
+            <span>Nilai Max</span>
+            <input type="number" id="devMax" value="50">
+          </label>
+        </div>
+      </div>
+
+      <!-- field khusus tipe Saklar -->
+      <div class="field-group" id="switchFields" hidden>
+        <label class="field">
+          <span>Topic Status (langganan)</span>
+          <input type="text" id="devTopicState" placeholder="rumah/teras/lampu">
+        </label>
+        <label class="field">
+          <span>Topic Perintah (kirim ON/OFF)</span>
+          <input type="text" id="devTopicSet" placeholder="rumah/teras/lampu/set">
+        </label>
+      </div>
+    </div>
+
+    <div class="settings-actions">
+      <button class="btn btn-ghost" id="cancelDeviceBtn" type="button">Batal</button>
+      <button class="btn btn-primary" id="saveDeviceBtn" type="button">Tambah Perangkat</button>
+    </div>
+  </section>
+
+  <!-- ===== Pengaturan Koneksi Broker (collapsible) ===== -->
+  <section class="settings" id="settingsPanel">
+    <div class="settings-head">
+      <h2>Pengaturan Koneksi</h2>
+      <button class="link-btn" id="closeSettingsBtn" type="button">Tutup</button>
+    </div>
+
+    <div class="settings-grid">
+      <label class="field">
+        <span>Broker WebSocket URL</span>
+        <input type="text" id="brokerUrl" placeholder="wss://broker.hivemq.com:8884/mqtt">
+      </label>
+      <label class="field">
+        <span>Client ID</span>
+        <input type="text" id="clientId" placeholder="web-panel-xxxx">
+      </label>
+      <label class="field">
+        <span>Username <em>(opsional)</em></span>
+        <input type="text" id="mqttUser" placeholder="">
+      </label>
+      <label class="field">
+        <span>Password <em>(opsional)</em></span>
+        <input type="password" id="mqttPass" placeholder="">
+      </label>
+    </div>
+
+    <div class="settings-actions">
+      <button class="btn btn-ghost" id="simulateBtn" type="button">Coba Mode Simulasi</button>
+      <button class="btn btn-primary" id="connectBtn" type="button">Simpan &amp; Hubungkan</button>
+    </div>
+    <p class="settings-note">Pengaturan tersimpan otomatis di browser ini. Topic tiap perangkat diatur lewat kartu "+ Tambah Perangkat" di atas, bukan di sini.</p>
+  </section>
+
+</div>
+
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
